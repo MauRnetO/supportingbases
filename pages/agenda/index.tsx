@@ -20,7 +20,16 @@ export default function Agenda() {
   async function carregarAgenda() {
     const { data, error } = await supabase
       .from("agendamentos")
-      .select("id, data, hora, servico, valor, cliente:cliente_id(nome)")
+      .select('
+        id, 
+        data, 
+        hora, 
+        servico, 
+        valor, 
+        cliente:cliente_id(
+          nome
+        )
+      ')
       .eq("data", dataSelecionada)
       .order("hora", { ascending: true });
 
