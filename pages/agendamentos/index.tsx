@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from "react";
 import { supabase } from "../../supabaseClient";
 
@@ -7,53 +6,99 @@ interface Cliente {
   nome: string;
 }
 
+interface Servico {
+  id: string;
+  nome: string;
+  valor: number;
+  duracao_minutos: number;
+}
+
 export default function Agendamentos() {
   const [clientes, setClientes] = useState<Cliente[]>([]);
+  const [servicos, setServicos] = useState<Servico[]>([]);
   const [clienteId, setClienteId] = useState("");
+  const [servicoId, setServicoId] = useState("");
+  const [valor, setValor] = useState<number | null>(null);
   const [data, setData] = useState("");
   const [hora, setHora] = useState("");
-  const [servico, setServico] = useState("");
-  const [valor, setValor] = useState("");
 
   async function carregarClientes() {
-    const { data, error } = await supabase.from("clientes").select("id, nome").order("nome");
+    const { data, error } = await supabase.from("clientes").select("*").order("created_at", { ascending: false });
     if (!error && data) setClientes(data);
   }
 
-  async function agendar() {
-    if (!clienteId || !data || !hora || !servico) return alert("Preencha todos os campos");
-    await supabase.from("agendamentos").insert([{
-      cliente_id: clienteId,
-      data,
-      hora,
-      servico,
-      valor
-    }]);
-    setClienteId(""); setData(""); setHora(""); setServico(""); setValor("");
-    alert("Agendamento realizado!");
+  async function carregarServicos() {
+    const { data, error } = await supabase.from("servicos").select("*").order("created_at", { ascending: false });
+    if (!error && data) setServicos(data);
+  }
+
+  async function criarAgendamento() {
+    if (!clienteId || !servicoId || !data || !hora) {
+      alert("Preencha todos os campos.");
+      return;
+    }
+
+    const servicoSelecionado = servicos.find(s => s.id === servicoId);
+    if (!servicoSelecionado) return;
+
+    await supabase.from("agendamentos").insert([
+      {
+        cliente_id: clienteId,
+        servico: servicoSelecionado.nome,
+        valor: servicoSelecionado.valor,
+        data,
+        hora
+      }
+    ]);
+
+    alert("Agendamento criado!");
+    setClienteId("");
+    setServicoId("");
+    setValor(null);
+    setData("");
+    setHora("");
   }
 
   useEffect(() => {
     carregarClientes();
+    carregarServicos();
   }, []);
 
-  return (
-    <div className="max-w-2xl mx-auto p-4">
-      <h1 className="text-2xl font-bold mb-4">Novo Agendamento</h1>
+  useEffect(() => {
+    const servico = servicos.find(s => s.id === servicoId);
+    if (servico) setValor(servico.valor);
+  }, [servicoId]);
 
-      <div className="space-y-3">
-        <select className="w-full p-2 border rounded" value={clienteId} onChange={e => setClienteId(e.target.value)}>
-          <option value="">Selecione um cliente</option>
-          {clientes.map(cli => (
-            <option key={cli.id} value={cli.id}>{cli.nome}</option>
-          ))}
-        </select>
-        <input type="date" className="w-full p-2 border rounded" value={data} onChange={e => setData(e.target.value)} />
-        <input type="time" className="w-full p-2 border rounded" value={hora} onChange={e => setHora(e.target.value)} />
-        <input type="text" placeholder="Serviço" className="w-full p-2 border rounded" value={servico} onChange={e => setServico(e.target.value)} />
-        <input type="number" placeholder="Valor (opcional)" className="w-full p-2 border rounded" value={valor} onChange={e => setValor(e.target.value)} />
-        <button onClick={agendar} className="bg-green-600 text-white px-4 py-2 rounded">Agendar</button>
-      </div>
+  return (
+    <div className="max-w-xl mx-auto p-4 space-y-4">
+      <h1 className="text-2xl font-bold">Novo Agendamento</h1>
+
+      <select className="w-full p-2 border rounded" value={clienteId} onChange={(e) => setClienteId(e.target.value)}>
+        <option value="">Selecione o cliente</option>
+        {clientes.map((c) => (
+          <option key={c.id} value={c.id}>{c.nome}</option>
+        ))}
+      </select>
+
+      <select className="w-full p-2 border rounded" value={servicoId} onChange={(e) => setServicoId(e.target.value)}>
+        <option value="">Selecione o serviço</option>
+        {servicos.map((s) => (
+          <option key={s.id} value={s.id}>{s.nome} — R$ {s.valor.toFixed(2)}</option>
+        ))}
+      </select>
+
+      <input type="date" value={data} onChange={(e) => setData(e.target.value)} className="w-full p-2 border rounded" />
+      <input type="time" value={hora} onChange={(e) => setHora(e.target.value)} className="w-full p-2 border rounded" />
+
+      <input
+        type="text"
+        value={valor !== null ? `R$ ${valor.toFixed(2)}` : ""}
+        readOnly
+        className="w-full p-2 border rounded bg-gray-100 text-gray-700"
+        placeholder="Valor"
+      />
+
+      <button onClick={criarAgendamento} className="bg-green-600 text-white px-4 py-2 rounded w-full">Salvar</button>
     </div>
   );
 }
