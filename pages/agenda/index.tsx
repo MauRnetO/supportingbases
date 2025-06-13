@@ -10,7 +10,7 @@ interface Agendamento {
   valor: number;
   cliente: {
     nome: string;
-  }[];  
+  } | null;
 }
 
 export default function Agenda() {
@@ -20,7 +20,7 @@ export default function Agenda() {
   async function carregarAgenda() {
     const { data, error } = await supabase
       .from("agendamentos")
-      .select('
+      .select(`
         id, 
         data, 
         hora, 
@@ -29,7 +29,7 @@ export default function Agenda() {
         cliente:cliente_id(
           nome
         )
-      ')
+      `)
       .eq("data", dataSelecionada)
       .order("hora", { ascending: true });
 
