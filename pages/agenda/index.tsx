@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from "react";
 import { supabase } from "../../supabaseClient";
 
@@ -10,12 +9,14 @@ interface Agendamento {
   valor: number;
   cliente: {
     nome: string;
-  }[];
+  } | null;
 }
 
 export default function Agenda() {
   const [agendamentos, setAgendamentos] = useState<Agendamento[]>([]);
-  const [dataSelecionada, setDataSelecionada] = useState(() => new Date().toISOString().split("T")[0]);
+  const [dataSelecionada, setDataSelecionada] = useState(() =>
+    new Date().toISOString().split("T")[0]
+  );
 
   async function carregarAgenda() {
     const { data, error } = await supabase
@@ -33,7 +34,11 @@ export default function Agenda() {
       .eq("data", dataSelecionada)
       .order("hora", { ascending: true });
 
-    if (!error && data) setAgendamentos(data);
+    if (error) {
+      console.error("Erro ao carregar agendamentos:", error.message);
+    } else if (data) {
+      setAgendamentos(data);
+    }
   }
 
   useEffect(() => {
@@ -56,18 +61,30 @@ export default function Agenda() {
       ) : (
         <ul className="space-y-3">
           {agendamentos.map((ag) => (
-            <li key={ag.id} className="border rounded p-3 shadow flex flex-col gap-2">
-              <div className="font-semibold text-lg">{ag.hora} — {ag.cliente?.[0]?.nome || "Cliente não encontrado"}</div>
+            <li
+              key={ag.id}
+              className="border rounded p-3 shadow flex flex-col gap-2"
+            >
+              <div className="font-semibold text-lg">
+                {ag.hora} — {ag.cliente?.nome || "Cliente não encontrado"}
+              </div>
               <div className="text-sm text-gray-700">{ag.servico}</div>
-              {ag.valor && <div className="text-sm text-green-700 font-semibold">R$ {ag.valor.toFixed(2)}</div>}
+              {typeof ag.valor === "number" && (
+                <div className="text-sm text-green-700 font-semibold">
+                  R$ {ag.valor.toFixed(2)}
+                </div>
+              )}
 
               <a
-               href={`https://wa.me/?text=${encodeURIComponent(`Olá ${ag.cliente?.[0]?.nome || ""}, lembrando seu horário para dia ${dataSelecionada} às ${ag.hora}. Qualquer dúvida estou à disposição! 😉`)}`}
-               target="_blank"
-               rel="noopener noreferrer"
-               className="inline-block mt-1 text-sm text-blue-600 underline"
+                href={`https://wa.me/?text=${encodeURIComponent(
+                  `Olá ${ag.cliente?.nome || ""}, lembrando seu horário para dia ${dataSelecionada} às ${ag.hora}. Qualquer dúvida estou à disposição! 😉`
+                )}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-block mt-1 text-sm text-blue-600 underline"
+                title="Enviar lembrete no WhatsApp"
               >
-               Enviar lembrete por WhatsApp
+                Enviar lembrete por WhatsApp
               </a>
             </li>
           ))}
