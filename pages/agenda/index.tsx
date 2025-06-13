@@ -10,7 +10,7 @@ interface Agendamento {
   valor: number;
   cliente: {
     nome: string;
-  } | null;
+  }[];
 }
 
 export default function Agenda() {
