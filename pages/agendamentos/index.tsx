@@ -1,161 +1,158 @@
 import { useEffect, useState } from "react";
-import { supabase } from "../../supabaseClient";
+import { supabase } from "././supabaseClient";
 
-interface Cliente {
+interface Agendamento {
   id: string;
-  nome: string;
-}
-
-interface Servico {
-  id: string;
-  nome: string;
+  data: string;
+  hora: string;
   valor: number;
-  duracao_minutos: number;
+  nome_cliente: string;
+  servicos: string;
 }
 
-export default function Agendamentos() {
-  const [clientes, setClientes] = useState<Cliente[]>([]);
-  const [servicos, setServicos] = useState<Servico[]>([]);
-  const [clienteId, setClienteId] = useState("");
-  const [servicosSelecionados, setServicosSelecionados] = useState<string[]>([]);
-  const [data, setData] = useState("");
-  const [hora, setHora] = useState("");
-  const [mensagem, setMensagem] = useState("");
+export default function Agenda() {
+  const [agendamentos, setAgendamentos] = useState<Agendamento[]>([]);
+  const [dataSelecionada, setDataSelecionada] = useState(() =>
+    new Date().toISOString().split("T")[0]
+  );
+  const [carregando, setCarregando] = useState(false);
+  const [erro, setErro] = useState("");
+ 
 
-  const valorTotal = servicos
-    .filter((s) => servicosSelecionados.includes(s.id))
-    .reduce((acc, s) => acc + s.valor, 0);
+  const [horariosDisponiveis, setHorariosDisponiveis] = useState<string[]>([]);
 
-  async function carregarClientes() {
-    const { data, error } = await supabase
-      .from("clientes")
-      .select("*")
-      .order("created_at", { ascending: false });
-    if (!error && data) setClientes(data);
-  }
+  function gerarIntervalos(minutos: number) {
+    const inicio = 8 * 60; // 08:00
+    const fim = 20 * 60;   // 20:00
+    const horarios: string[] = [];
 
-  async function carregarServicos() {
-    const { data, error } = await supabase
-      .from("servicos")
-      .select("*")
-      .order("created_at", { ascending: false });
-    if (!error && data) setServicos(data);
-  }
-
-  async function criarAgendamento() {
-    if (!clienteId || !data || !hora || servicosSelecionados.length === 0) {
-      setMensagem("Preencha todos os campos e selecione pelo menos um serviço.");
-      return;
+    for (let i = inicio; i <= fim; i += minutos) {
+      const h = String(Math.floor(i / 60)).padStart(2, "0");
+      const m = String(i % 60).padStart(2, "0");
+      horarios.push(`${h}:${m}`);
     }
 
-    const { data: novoAgendamento, error } = await supabase
-      .from("agendamentos")
-      .insert([{ cliente_id: clienteId, data, hora, valor: valorTotal }])
-      .select()
-      .single();
+    return horarios;
+  }
 
-    if (error || !novoAgendamento) {
-      setMensagem("Erro ao salvar agendamento.");
-      return;
-    }
+  async function carregarHorariosDisponiveis() {
+    const { data, error } = await supabase.rpc("listar_agenda_com_duracao", {
+      data_input: dataSelecionada,
+    });
 
-    const registros = servicosSelecionados.map((servicoId) => ({
-      agendamento_id: novoAgendamento.id,
-      servico_id: servicoId,
-    }));
+    if (error || !data) return;
 
-    const { error: erroServicos } = await supabase
-      .from("agendamentos_servicos")
-      .insert(registros);
+    // Cada item deve conter { hora, duracao_total }
+    const ocupados: { hora: string; duracao_total: number }[] = data;
 
-    if (erroServicos) {
-      setMensagem("Agendamento criado, mas houve erro ao vincular os serviços.");
+    const ocupadas: string[] = [];
+    ocupados.forEach(({ hora, duracao_total }) => {
+      const [h, m] = hora.split(":").map(Number);
+      const inicioMin = h * 60 + m;
+      const blocos = Math.ceil(duracao_total / 30);
+
+      for (let i = 0; i < blocos; i++) {
+        const totalMin = inicioMin + i * 30;
+        const hr = String(Math.floor(totalMin / 60)).padStart(2, "0");
+        const min = String(totalMin % 60).padStart(2, "0");
+        ocupadas.push(`${hr}:${min}`);
+      }
+    });
+
+    const todos = gerarIntervalos(30);
+    const livres = todos.filter((h) => !ocupadas.includes(h));
+    setHorariosDisponiveis(livres);
+  }
+
+  // Chamar isso sempre que mudar a data
+  useEffect(() => {
+    if (dataSelecionada) carregarHorariosDisponiveis();
+  }, [dataSelecionada]);
+
+
+  async function carregarAgenda() {
+    setCarregando(true);
+    const { data, error } = await supabase.rpc("listar_agenda_com_multiplos_servicos", {
+      data_input: dataSelecionada,
+    });
+
+    if (error) {
+      console.error("Erro ao carregar agendamentos:", error.message);
+      setErro("Erro ao carregar agendamentos.");
     } else {
-      setMensagem("✅ Agendamento salvo com sucesso!");
-      setClienteId("");
-      setData("");
-      setHora("");
-      setServicosSelecionados([]);
+      setAgendamentos(data || []);
+    }
+
+    setCarregando(false);
+  }
+
+  async function excluirAgendamento(id: string) {
+    if (!confirm("Deseja realmente excluir este agendamento?")) return;
+
+    const { error } = await supabase.from("agendamentos").delete().eq("id", id);
+    if (error) {
+      alert("Erro ao excluir.");
+    } else {
+      setAgendamentos((prev) => prev.filter((ag) => ag.id !== id));
     }
   }
 
   useEffect(() => {
-    carregarClientes();
-    carregarServicos();
-  }, []);
+    carregarAgenda();
+  }, [dataSelecionada]);
 
   return (
-    <div className="max-w-xl mx-auto p-4 space-y-4">
-      <h1 className="text-2xl font-bold">Novo Agendamento</h1>
-
-      {mensagem && <p className="text-sm text-blue-600">{mensagem}</p>}
-
-      <select
-        className="w-full p-2 border rounded"
-        value={clienteId}
-        onChange={(e) => setClienteId(e.target.value)}
-      >
-        <option value="">Selecione o cliente</option>
-        {clientes.map((c) => (
-          <option key={c.id} value={c.id}>
-            {c.nome}
-          </option>
-        ))}
-      </select>
-
-      <fieldset className="border p-2 rounded">
-        <legend className="text-sm font-medium text-gray-700 mb-1">
-          Selecione os serviços:
-        </legend>
-        <div className="flex flex-col gap-1 max-h-40 overflow-y-auto">
-          {servicos.map((s) => (
-            <label key={s.id} className="flex items-center gap-2 text-sm">
-              <input
-                type="checkbox"
-                value={s.id}
-                checked={servicosSelecionados.includes(s.id)}
-                onChange={(e) => {
-                  const checked = e.target.checked;
-                  setServicosSelecionados((prev) =>
-                    checked
-                      ? [...prev, s.id]
-                      : prev.filter((id) => id !== s.id)
-                  );
-                }}
-              />
-              {s.nome} — R$ {s.valor.toFixed(2)}
-            </label>
-          ))}
-        </div>
-      </fieldset>
+    <div className="max-w-3xl mx-auto p-4">
+      <h1 className="text-2xl font-bold mb-4">Agenda do Dia</h1>
 
       <input
         type="date"
-        value={data}
-        onChange={(e) => setData(e.target.value)}
-        className="w-full p-2 border rounded"
-      />
-      <input
-        type="time"
-        value={hora}
-        onChange={(e) => setHora(e.target.value)}
-        className="w-full p-2 border rounded"
+        value={dataSelecionada}
+        onChange={(e) => setDataSelecionada(e.target.value)}
+        className="mb-4 p-2 border rounded"
       />
 
-      <input
-        type="text"
-        value={valorTotal > 0 ? `R$ ${valorTotal.toFixed(2)}` : ""}
-        readOnly
-        className="w-full p-2 border rounded bg-gray-100 text-gray-700"
-        placeholder="Valor total"
-      />
+      {carregando ? (
+        <p>Carregando...</p>
+      ) : agendamentos.length === 0 ? (
+        <p>Nenhum agendamento para esta data.</p>
+      ) : (
+        <ul className="space-y-3">
+          {agendamentos.map((ag) => (
+            <li key={ag.id} className="border rounded p-3 shadow flex flex-col gap-2">
+              <div className="font-semibold text-lg">
+                {ag.hora} — {ag.nome_cliente || "Cliente não encontrado"}
+              </div>
+              <div className="text-sm text-gray-700">{ag.servicos}</div>
+              {typeof ag.valor === "number" && (
+                <div className="text-sm text-green-700 font-semibold">
+                  R$ {ag.valor.toFixed(2)}
+                </div>
+              )}
 
-      <button
-        onClick={criarAgendamento}
-        className="bg-green-600 text-white px-4 py-2 rounded w-full"
-      >
-        Salvar Agendamento
-      </button>
+              <div className="flex gap-4 mt-2">
+                <a
+                  href={`https://wa.me/?text=${encodeURIComponent(
+                    `Olá ${ag.nome_cliente || ""}, lembrando seu horário para dia ${dataSelecionada} às ${ag.hora}. Serviços: ${ag.servicos}. Qualquer dúvida estou à disposição! 😉`
+                  )}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-sm text-blue-600 underline"
+                >
+                  Enviar WhatsApp
+                </a>
+
+                <button
+                  onClick={() => excluirAgendamento(ag.id)}
+                  className="text-sm text-red-600 underline"
+                >
+                  Excluir
+                </button>
+              </div>
+            </li>
+          ))}
+        </ul>
+      )}
     </div>
   );
 }

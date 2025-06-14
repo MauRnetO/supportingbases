@@ -7,7 +7,7 @@ interface Agendamento {
   hora: string;
   valor: number;
   nome_cliente: string;
-  servicos: string; // agora será uma string com os nomes concatenados
+  servicos: string;
 }
 
 export default function Agenda() {
@@ -15,6 +15,7 @@ export default function Agenda() {
   const [dataSelecionada, setDataSelecionada] = useState(() =>
     new Date().toISOString().split("T")[0]
   );
+  const [horariosOcupados, setHorariosOcupados] = useState<string[]>([]);
 
   async function carregarAgenda() {
     const { data, error } = await supabase.rpc("listar_agenda_com_multiplos_servicos", {
@@ -25,7 +26,22 @@ export default function Agenda() {
       console.error("Erro ao carregar agendamentos:", error.message);
     } else if (data) {
       setAgendamentos(data);
+      setHorariosOcupados(data.map((ag: Agendamento) => ag.hora));
     }
+  }
+
+  async function excluirAgendamento(id: string) {
+    const confirmacao = confirm("Tem certeza que deseja excluir este agendamento?");
+    if (!confirmacao) return;
+
+    const { error } = await supabase.from("agendamentos").delete().eq("id", id);
+    if (error) {
+      alert("Erro ao excluir agendamento");
+      return;
+    }
+
+    // Após excluir, recarrega
+    carregarAgenda();
   }
 
   useEffect(() => {
@@ -49,15 +65,27 @@ export default function Agenda() {
         <ul className="space-y-3">
           {agendamentos.map((ag) => (
             <li key={ag.id} className="border rounded p-3 shadow flex flex-col gap-2">
-              <div className="font-semibold text-lg">
-                {ag.hora} — {ag.nome_cliente || "Cliente não encontrado"}
+              <div className="flex justify-between items-center">
+                <div className="font-semibold text-lg">
+                  {ag.hora} — {ag.nome_cliente || "Cliente não encontrado"}
+                </div>
+                <button
+                  onClick={() => excluirAgendamento(ag.id)}
+                  className="text-red-600 text-sm hover:underline"
+                  title="Excluir agendamento"
+                >
+                  Excluir
+                </button>
               </div>
+
               <div className="text-sm text-gray-700">{ag.servicos}</div>
+
               {typeof ag.valor === "number" && (
                 <div className="text-sm text-green-700 font-semibold">
                   R$ {ag.valor.toFixed(2)}
                 </div>
               )}
+
               <a
                 href={`https://wa.me/?text=${encodeURIComponent(
                   `Olá ${ag.nome_cliente || ""}, lembrando seu horário para dia ${dataSelecionada} às ${ag.hora}. Serviços: ${ag.servicos}. Qualquer dúvida estou à disposição! 😉`
