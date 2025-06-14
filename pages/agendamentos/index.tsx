@@ -103,25 +103,31 @@ export default function Agendamentos() {
         ))}
       </select>
 
-      <label className="block text-sm font-medium text-gray-700">
-        Serviços:
-      </label>
-      <select
-        multiple
-        value={servicosSelecionados}
-        onChange={(e) =>
-          setServicosSelecionados(
-            Array.from(e.target.selectedOptions, (opt) => opt.value)
-          )
-        }
-        className="w-full p-2 border rounded h-32"
-      >
-        {servicos.map((s) => (
-          <option key={s.id} value={s.id}>
-            {s.nome} — R$ {s.valor.toFixed(2)}
-          </option>
-        ))}
-      </select>
+      <fieldset className="border p-2 rounded">
+        <legend className="text-sm font-medium text-gray-700 mb-1">
+          Selecione os serviços:
+        </legend>
+        <div className="flex flex-col gap-1 max-h-40 overflow-y-auto">
+          {servicos.map((s) => (
+            <label key={s.id} className="flex items-center gap-2 text-sm">
+              <input
+                type="checkbox"
+                value={s.id}
+                checked={servicosSelecionados.includes(s.id)}
+                onChange={(e) => {
+                  const checked = e.target.checked;
+                  setServicosSelecionados((prev) =>
+                    checked
+                      ? [...prev, s.id]
+                      : prev.filter((id) => id !== s.id)
+                  );
+                }}
+              />
+              {s.nome} — R$ {s.valor.toFixed(2)}
+            </label>
+          ))}
+        </div>
+      </fieldset>
 
       <input
         type="date"
