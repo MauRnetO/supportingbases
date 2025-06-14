@@ -9,7 +9,7 @@ interface Agendamento {
   valor: number;
   cliente: {
     nome: string;
-  } | null;
+  }[];
 }
 
 export default function Agenda() {
@@ -27,9 +27,7 @@ export default function Agenda() {
         hora, 
         servico, 
         valor, 
-        cliente:cliente_id(
-          nome
-        )
+        cliente:cliente_id(nome)
       `)
       .eq("data", dataSelecionada)
       .order("hora", { ascending: true });
@@ -66,7 +64,7 @@ export default function Agenda() {
               className="border rounded p-3 shadow flex flex-col gap-2"
             >
               <div className="font-semibold text-lg">
-                {ag.hora} — {ag.cliente?.nome || "Cliente não encontrado"}
+                {ag.hora} — {ag.cliente?.[0]?.nome || "Cliente não encontrado"}
               </div>
               <div className="text-sm text-gray-700">{ag.servico}</div>
               {typeof ag.valor === "number" && (
@@ -77,7 +75,7 @@ export default function Agenda() {
 
               <a
                 href={`https://wa.me/?text=${encodeURIComponent(
-                  `Olá ${ag.cliente?.nome || ""}, lembrando seu horário para dia ${dataSelecionada} às ${ag.hora}. Qualquer dúvida estou à disposição! 😉`
+                  `Olá ${ag.cliente?.[0]?.nome || ""}, lembrando seu horário para dia ${dataSelecionada} às ${ag.hora}. Qualquer dúvida estou à disposição! 😉`
                 )}`}
                 target="_blank"
                 rel="noopener noreferrer"
