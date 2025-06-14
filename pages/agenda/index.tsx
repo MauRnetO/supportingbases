@@ -35,6 +35,7 @@ export default function Agenda() {
     if (error) {
       console.error("Erro ao carregar agendamentos:", error.message);
     } else if (data) {
+      console.log("Dados recebidos do Supabase:", data);
       setAgendamentos(data);
     }
   }
