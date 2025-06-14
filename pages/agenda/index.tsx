@@ -5,9 +5,9 @@ interface Agendamento {
   id: string;
   data: string;
   hora: string;
-  servico: string;
   valor: number;
   nome_cliente: string;
+  servicos: string; // agora será uma string com os nomes concatenados
 }
 
 export default function Agenda() {
@@ -17,7 +17,7 @@ export default function Agenda() {
   );
 
   async function carregarAgenda() {
-    const { data, error } = await supabase.rpc("listar_agenda_com_clientes", {
+    const { data, error } = await supabase.rpc("listar_agenda_com_multiplos_servicos", {
       data_input: dataSelecionada,
     });
 
@@ -48,23 +48,19 @@ export default function Agenda() {
       ) : (
         <ul className="space-y-3">
           {agendamentos.map((ag) => (
-            <li
-              key={ag.id}
-              className="border rounded p-3 shadow flex flex-col gap-2"
-            >
+            <li key={ag.id} className="border rounded p-3 shadow flex flex-col gap-2">
               <div className="font-semibold text-lg">
                 {ag.hora} — {ag.nome_cliente || "Cliente não encontrado"}
               </div>
-              <div className="text-sm text-gray-700">{ag.servico}</div>
+              <div className="text-sm text-gray-700">{ag.servicos}</div>
               {typeof ag.valor === "number" && (
                 <div className="text-sm text-green-700 font-semibold">
                   R$ {ag.valor.toFixed(2)}
                 </div>
               )}
-
               <a
                 href={`https://wa.me/?text=${encodeURIComponent(
-                  `Olá ${ag.nome_cliente || ""}, lembrando seu horário para dia ${dataSelecionada} às ${ag.hora}. Qualquer dúvida estou à disposição! 😉`
+                  `Olá ${ag.nome_cliente || ""}, lembrando seu horário para dia ${dataSelecionada} às ${ag.hora}. Serviços: ${ag.servicos}. Qualquer dúvida estou à disposição! 😉`
                 )}`}
                 target="_blank"
                 rel="noopener noreferrer"
