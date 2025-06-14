@@ -7,9 +7,7 @@ interface Agendamento {
   hora: string;
   servico: string;
   valor: number;
-  cliente: {
-    nome: string;
-  }[];
+  nome_cliente: string;
 }
 
 export default function Agenda() {
@@ -19,23 +17,13 @@ export default function Agenda() {
   );
 
   async function carregarAgenda() {
-    const { data, error } = await supabase
-      .from("agendamentos")
-      .select(`
-        id, 
-        data, 
-        hora, 
-        servico, 
-        valor, 
-        cliente:clientes(nome)
-      `)
-      .eq("data", dataSelecionada)
-      .order("hora", { ascending: true });
+    const { data, error } = await supabase.rpc("listar_agenda_com_clientes", {
+      data_input: dataSelecionada,
+    });
 
     if (error) {
       console.error("Erro ao carregar agendamentos:", error.message);
     } else if (data) {
-      console.log("Dados recebidos do Supabase:", data);
       setAgendamentos(data);
     }
   }
@@ -65,7 +53,7 @@ export default function Agenda() {
               className="border rounded p-3 shadow flex flex-col gap-2"
             >
               <div className="font-semibold text-lg">
-                {ag.hora} — {ag.cliente?.[0]?.nome || "Cliente não encontrado"}
+                {ag.hora} — {ag.nome_cliente || "Cliente não encontrado"}
               </div>
               <div className="text-sm text-gray-700">{ag.servico}</div>
               {typeof ag.valor === "number" && (
@@ -76,7 +64,7 @@ export default function Agenda() {
 
               <a
                 href={`https://wa.me/?text=${encodeURIComponent(
-                  `Olá ${ag.cliente?.[0]?.nome || ""}, lembrando seu horário para dia ${dataSelecionada} às ${ag.hora}. Qualquer dúvida estou à disposição! 😉`
+                  `Olá ${ag.nome_cliente || ""}, lembrando seu horário para dia ${dataSelecionada} às ${ag.hora}. Qualquer dúvida estou à disposição! 😉`
                 )}`}
                 target="_blank"
                 rel="noopener noreferrer"
