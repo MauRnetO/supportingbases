@@ -27,7 +27,7 @@ export default function Agenda() {
         hora, 
         servico, 
         valor, 
-        cliente:cliente_id(nome)
+        cliente:clientes(nome)
       `)
       .eq("data", dataSelecionada)
       .order("hora", { ascending: true });
