@@ -97,6 +97,21 @@ export default function Agenda() {
     }
   }
 
+  async function concluirAgendamento(id: string) {
+    const { error } = await supabase
+      .from("agendamentos")
+      .update({ concluido: true })
+      .eq("id", id);
+
+    if (error) {
+      alert("Erro ao marcar como concluído.");
+    } else {
+      // Atualiza a lista local sem o agendamento concluído
+      setAgendamentos((prev) => prev.filter((ag) => ag.id !== id));
+    }
+  }
+
+
   useEffect(() => {
     carregarAgenda();
   }, [dataSelecionada]);
@@ -143,11 +158,19 @@ export default function Agenda() {
                 </a>
 
                 <button
+                  onClick={() => concluirAgendamento(ag.id)}
+                  className="text-sm text-green-600 underline"
+                >
+                  Marcar como Concluído
+                </button>
+
+                <button
                   onClick={() => excluirAgendamento(ag.id)}
                   className="text-sm text-red-600 underline"
                 >
                   Excluir
-                </button>
+              </button>
+
               </div>
             </li>
           ))}

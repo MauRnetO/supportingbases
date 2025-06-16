@@ -10,7 +10,7 @@ export default function Dashboard() {
         <Card
           title="Agendamentos"
           description="Veja, edite e exclua os agendamentos do dia."
-          href="/agendamentos/index.tsx"
+          href="/agendamentos"
           icon={<Calendar size={28} />}
         />
 
@@ -24,21 +24,21 @@ export default function Dashboard() {
         <Card
           title="Clientes"
           description="Gerencie os dados e cadastros de clientes."
-          href="/clientes/index.tsx"
+          href="/clientes"
           icon={<Users size={28} />}
         />
 
         <Card
           title="Serviços"
           description="Adicione, edite ou exclua serviços oferecidos."
-          href="/servicos/index.tsx"
+          href="/servicos"
           icon={<Settings size={28} />}
         />
 
         <Card
           title="Histórico"
           description="Visualize estatísticas de faturamento e produtividade."
-          href="/historico/index.tsx"
+          href="/historico"
           icon={<ClipboardList size={28} />}
         />
       </div>

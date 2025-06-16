@@ -8,7 +8,7 @@ export function useRequireAuth() {
 
   useEffect(() => {
     if (!loading && !user) {
-      router.push("/login");
+      router.push("/Login");
     }
   }, [user, loading, router]);
 

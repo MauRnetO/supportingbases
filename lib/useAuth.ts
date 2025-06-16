@@ -11,7 +11,7 @@ export default function useAuth() {
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (!session) {
-        router.push("/login");
+        router.push("/Login");
       } else {
         setUser(session.user);
       }
@@ -20,7 +20,7 @@ export default function useAuth() {
 
     const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
       if (!session) {
-        router.push("/login");
+        router.push("/Login");
         setUser(null);
       } else {
         setUser(session.user);

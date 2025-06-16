@@ -6,9 +6,11 @@ import { Home, Calendar, Users, Settings, LogOut } from "lucide-react";
 const menu = [
   { label: "Início", href: "/", icon: <Home size={18} /> },
   { label: "Agenda", href: "/agenda", icon: <Calendar size={18} /> },
-  { label: "Agendamentos", href: "/agendamentos/novo", icon: <Calendar size={18} /> },
+  { label: "Agendamentos", href: "/agendamentos", icon: <Calendar size={18} /> },
+  { label: "Novo Agendamento", href: "/agendamentos/novo", icon: <Calendar size={18} /> },
   { label: "Clientes", href: "/clientes", icon: <Users size={18} /> },
   { label: "Serviços", href: "/servicos", icon: <Settings size={18} /> },
+  { label: "Histórico", href: "/historico", icon: <Settings size={18} /> },
 ];
 
 export default function Layout({ children }: { children: React.ReactNode }) {
@@ -16,7 +18,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
 
   async function sair() {
     await supabase.auth.signOut();
-    router.replace("/login");
+    router.replace("/Login");
   }
 
   return (

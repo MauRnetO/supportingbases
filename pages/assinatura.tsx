@@ -12,7 +12,7 @@ export default function Assinatura() {
       if (data?.user?.id) {
         setUsuarioId(data.user.id);
       } else {
-        router.push("/login");
+        router.push("/Login");
       }
     });
   }, []);

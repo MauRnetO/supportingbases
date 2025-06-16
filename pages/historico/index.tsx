@@ -27,13 +27,30 @@ export default function Historico() {
 
   async function buscarHistorico() {
     if (!clienteId) return;
+
     const { data, error } = await supabase
       .from("agendamentos")
-      .select("id, data, hora, servico, valor")
+      .select(`
+        id,
+        data,
+        hora,
+        valor,
+        agendamentos_servicos(servicos(nome))
+      `)
       .eq("cliente_id", clienteId)
+      .eq("concluido", true)
       .order("data", { ascending: false });
 
-    if (!error && data) setAgendamentos(data);
+    if (!error && data) {
+      const agsFormatados = data.map((ag: any) => ({
+        id: ag.id,
+        data: ag.data,
+        hora: ag.hora,
+        valor: ag.valor,
+        servico: ag.agendamentos_servicos.map((as: any) => as.servicos.nome).join(", "),
+      }));
+      setAgendamentos(agsFormatados);
+    }
   }
 
   useEffect(() => {

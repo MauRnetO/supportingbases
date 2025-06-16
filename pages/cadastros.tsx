@@ -27,7 +27,7 @@ export default function Cadastro() {
       setMensagem(error.message);
     } else {
       setMensagem("Conta criada! Verifique seu e-mail.");
-      setTimeout(() => router.push("/login"), 2000);
+      setTimeout(() => router.push("/Login"), 2000);
     }
   }
 

@@ -10,7 +10,7 @@ export default function App({ Component, pageProps }: AppProps) {
   const [loading, setLoading] = useState(true);
   const [session, setSession] = useState<any>(null);
 
-  const rotasPublicas = ["/login", "/cadastro", "/assinatura"];
+  const rotasPublicas = ["/Login", "/cadastro", "/assinatura"];
 
   useEffect(() => {
     async function validarSessao() {
@@ -22,8 +22,8 @@ export default function App({ Component, pageProps }: AppProps) {
 
       if (!sessao) {
         if (!rotasPublicas.includes(router.pathname)) {
-          console.warn("⚠️ Sem sessão. Redirecionando para /login");
-          router.replace("/login");
+          console.warn("⚠️ Sem sessão. Redirecionando para /Login");
+          router.replace("/Login");
         }
         setLoading(false);
         return;
@@ -57,7 +57,7 @@ export default function App({ Component, pageProps }: AppProps) {
         return;
       }
 
-      if (router.pathname === "/login") {
+      if (router.pathname === "/Login") {
         router.replace("/dashboard");
         return;
       }
@@ -87,7 +87,7 @@ export default function App({ Component, pageProps }: AppProps) {
     );
   }
 
-  if (["/login", "/cadastro", "/assinatura"].includes(router.pathname)) {
+  if (["/Login", "/cadastro", "/assinatura"].includes(router.pathname)) {
     return <Component {...pageProps} />;
   }
 
