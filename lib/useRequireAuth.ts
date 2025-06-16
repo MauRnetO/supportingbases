@@ -10,7 +10,7 @@ export function useRequireAuth() {
     if (!loading && !user) {
       router.push("/login");
     }
-  }, [loading, user, router]);
+  }, [user, loading, router]);
 
   return { user, loading };
 }
