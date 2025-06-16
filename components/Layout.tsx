@@ -1,11 +1,12 @@
 import Link from "next/link";
 import { useRouter } from "next/router";
 import { supabase } from "../supabaseClient";
-import { Home, Calendar, Users, Settings } from "lucide-react";
+import { Home, Calendar, Users, Settings, LogOut } from "lucide-react";
 
 const menu = [
   { label: "Início", href: "/", icon: <Home size={18} /> },
-  { label: "Agendamentos", href: "/agendamentos", icon: <Calendar size={18} /> },
+  { label: "Agenda", href: "/agenda", icon: <Calendar size={18} /> },
+  { label: "Agendamentos", href: "/agendamentos/novo", icon: <Calendar size={18} /> },
   { label: "Clientes", href: "/clientes", icon: <Users size={18} /> },
   { label: "Serviços", href: "/servicos", icon: <Settings size={18} /> },
 ];
@@ -15,7 +16,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
 
   async function sair() {
     await supabase.auth.signOut();
-    router.push("/login");
+    router.replace("/login");
   }
 
   return (
@@ -37,11 +38,13 @@ export default function Layout({ children }: { children: React.ReactNode }) {
             </Link>
           ))}
         </nav>
+
         <button
           onClick={sair}
-          className="mt-4 text-sm text-red-600 underline hover:text-red-800"
+          className="mt-6 flex items-center gap-2 p-2 rounded text-red-600 hover:bg-red-100 transition"
         >
-          Sair da conta
+          <LogOut size={18} />
+          <span>Sair</span>
         </button>
       </aside>
 
