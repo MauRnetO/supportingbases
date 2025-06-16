@@ -1,9 +1,8 @@
-
 import { useEffect } from "react";
 import { useRouter } from "next/router";
 import { supabase } from "../supabaseClient";
 
-export function useAuthGuard() {
+export default function useAuth() {
   const router = useRouter();
 
   useEffect(() => {
