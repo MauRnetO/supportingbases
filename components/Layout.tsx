@@ -8,7 +8,7 @@ const menu = [
   { label: "Início", href: "/dashboard", icon: <Home size={18} /> },
   { label: "Agendamentos", href: "/agendamentos", icon: <Calendar size={18} /> },
   { label: "Novo Agendamento", href: "/agendamentos/novo", icon: <Calendar size={18} /> },
-  { label: "Histórico", href: "/historico", icon={<ClipboardList size={28} />}
+  { label: "Histórico", href: "/historico", icon= <ClipboardList size={28} /> },
   { label: "Clientes", href: "/clientes", icon: <Users size={18} /> },
   { label: "Serviços", href: "/servicos", icon: <Settings size={18} /> },
 ];
