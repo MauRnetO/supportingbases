@@ -37,7 +37,16 @@ export default function Layout({ children }: { children: React.ReactNode }) {
           ${sidebarAberto ? "translate-x-0" : "-translate-x-full md:translate-x-0"}
         `}
       >
-        <h2 className="text-2xl font-bold text-green-600 mb-8">MinhaAgenda</h2>
+        <div className="flex items-center justify-between mb-8">
+          <h2 className="text-2xl font-bold text-green-600">MinhaAgenda</h2>
+          <button
+            className="md:hidden text-gray-700"
+            onClick={() => setSidebarAberto(false)}
+          >
+            <X size={24} />
+          </button>
+        </div>
+
         <nav className="flex-1 space-y-2">
           {menu.map((item) => (
             <Link
