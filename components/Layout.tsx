@@ -23,12 +23,15 @@ export default function Layout({ children }: { children: React.ReactNode }) {
   return (
     <div className="flex min-h-screen bg-gray-100">
       {/* Botão de menu para mobile */}
-      <button
-        className="md:hidden absolute top-4 left-4 z-50 text-gray-700"
-        onClick={() => setSidebarAberto(!sidebarAberto)}
-      >
-       
-      </button>
+
+      {!sidebarAberto && (
+        <button
+          className="md:hidden fixed top-4 left-4 z-50 text-gray-700"
+          onClick={() => setSidebarAberto(true)}
+        >
+      <Menu size={28} />
+    </button>
+  )}
 
       {/* Sidebar */}
       <aside
