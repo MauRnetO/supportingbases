@@ -27,7 +27,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
         className="md:hidden absolute top-4 left-4 z-50 text-gray-700"
         onClick={() => setSidebarAberto(!sidebarAberto)}
       >
-        {sidebarAberto ? <X size={28} /> : <Menu size={28} />}
+       
       </button>
 
       {/* Sidebar */}
