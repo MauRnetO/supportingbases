@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from "react";
 import { supabase } from "../../supabaseClient";
 
@@ -26,9 +25,7 @@ export default function Historico() {
   }
 
   async function buscarHistorico() {
-    if (!clienteId) return;
-
-    const { data, error } = await supabase
+    const query = supabase
       .from("agendamentos")
       .select(`
         id,
@@ -37,10 +34,12 @@ export default function Historico() {
         valor,
         agendamentos_servicos(servicos(nome))
       `)
-      .eq("cliente_id", clienteId)
       .eq("concluido", true)
       .order("data", { ascending: false });
 
+    if (clienteId) query.eq("cliente_id", clienteId);
+
+    const { data, error } = await query;
     if (!error && data) {
       const agsFormatados = data.map((ag: any) => ({
         id: ag.id,
@@ -53,13 +52,25 @@ export default function Historico() {
     }
   }
 
+  async function excluirAgendamento(id: string) {
+    const confirmar = confirm("Tem certeza que deseja excluir este agendamento? Esta ação é permanente.");
+    if (!confirmar) return;
+
+    const { error } = await supabase.from("agendamentos").delete().eq("id", id);
+    if (!error) {
+      setAgendamentos(prev => prev.filter(a => a.id !== id));
+    } else {
+      alert("Erro ao excluir agendamento.");
+    }
+  }
+
   useEffect(() => {
     carregarClientes();
   }, []);
 
   return (
     <div className="max-w-3xl mx-auto p-4">
-      <h1 className="text-2xl font-bold mb-4">Histórico por Cliente</h1>
+      <h1 className="text-2xl font-bold mb-4">Histórico de Agendamentos</h1>
 
       <div className="mb-6">
         <select
@@ -67,7 +78,7 @@ export default function Historico() {
           value={clienteId}
           onChange={(e) => setClienteId(e.target.value)}
         >
-          <option value="">Selecione um cliente</option>
+          <option value="">Ver todos os clientes</option>
           {clientes.map(cli => (
             <option key={cli.id} value={cli.id}>{cli.nome}</option>
           ))}
@@ -79,7 +90,7 @@ export default function Historico() {
       </div>
 
       {agendamentos.length === 0 ? (
-        <p>Nenhum agendamento encontrado para este cliente.</p>
+        <p>Nenhum agendamento encontrado.</p>
       ) : (
         <ul className="space-y-3">
           {agendamentos.map(ag => (
@@ -87,6 +98,12 @@ export default function Historico() {
               <div className="font-semibold">{ag.data} às {ag.hora}</div>
               <div className="text-sm text-gray-700">{ag.servico}</div>
               {ag.valor && <div className="text-sm text-green-700 font-semibold">R$ {ag.valor.toFixed(2)}</div>}
+              <button
+                onClick={() => excluirAgendamento(ag.id)}
+                className="mt-2 text-sm text-red-600 underline"
+              >
+                Excluir definitivamente
+              </button>
             </li>
           ))}
         </ul>
