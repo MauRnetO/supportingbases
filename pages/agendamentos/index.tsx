@@ -72,15 +72,37 @@ export default function Agenda() {
 
   async function carregarAgenda() {
     setCarregando(true);
-    const { data, error } = await supabase.rpc("listar_agenda_com_multiplos_servicos", {
-      data_input: dataSelecionada,
-    });
+
+    const { data, error } = await supabase
+      .from("agendamentos")
+      .select(`
+        id, data, hora, valor, concluido,
+        cliente_id,
+        clientes ( nome ),
+        servicos_agendados ( servico_id, servicos ( nome ) )
+      `)
+      .eq("data", dataSelecionada)
+      .eq("concluido", false)
+      .order("hora");
 
     if (error) {
       console.error("Erro ao carregar agendamentos:", error.message);
       setErro("Erro ao carregar agendamentos.");
     } else {
-      setAgendamentos(data || []);
+      // Formata os dados como antes
+      const formatado = data?.map((ag) => ({
+        id: ag.id,
+        data: ag.data,
+        hora: ag.hora,
+        valor: ag.valor,
+        nome_cliente: ag.clientes?.nome || "Cliente não encontrado",
+        servicos: ag.servicos_agendados
+          ?.map((s: any) => s.servicos?.nome)
+          .filter(Boolean)
+          .join(", ") || "",
+      })) || [];
+
+      setAgendamentos(formatado);
     }
 
     setCarregando(false);
