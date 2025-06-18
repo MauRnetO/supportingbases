@@ -78,12 +78,13 @@ export default function Agendamentos() {
       .select(`
         id, data, hora, valor, concluido,
         cliente_id,
-        clientes:clientes!clientes_id_fkey ( nome ),
+        clientes!cliente_id ( nome ),
         servicos_agendados ( servico_id, servicos ( nome ) )
       `)
       .eq("data", dataSelecionada)
       .eq("concluido", false)
       .order("hora");
+
 
     if (error) {
       console.error("Erro ao carregar agendamentos:", error.message);
