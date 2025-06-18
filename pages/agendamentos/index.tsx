@@ -78,7 +78,7 @@ export default function Agendamentos() {
       .select(`
         id, data, hora, valor, concluido,
         cliente_id,
-        clientes ( nome ),
+        clientes:clientes!clientes_id_fkey ( nome ),
         servicos_agendados ( servico_id, servicos ( nome ) )
       `)
       .eq("data", dataSelecionada)
