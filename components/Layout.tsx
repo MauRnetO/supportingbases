@@ -2,7 +2,7 @@ import Link from "next/link";
 import { useRouter } from "next/router";
 import { useState } from "react";
 import { supabase } from "../supabaseClient";
-import { Home, Calendar, Users, Settings, Menu, X, ClipBoard } from "lucide-react";
+import { Home, Calendar, Users, Settings, Menu, X, Clipboard } from "lucide-react";
 
 const menu = [
   { label: "Início", href: "/dashboard", icon: <Home size={18} /> },
