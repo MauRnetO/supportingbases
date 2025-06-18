@@ -22,6 +22,13 @@ export default function Dashboard() {
         />
 
         <Card
+          title="Calendário"
+          description="Visualizar dias disponíveis para agendamento"
+          href="/agenda"
+          icon={<ClipboardList size={28} />}
+        />
+
+        <Card
           title="Clientes"
           description="Gerencie os dados e cadastros de clientes."
           href="/clientes"

@@ -6,6 +6,7 @@ import { Home, Calendar, Users, Settings, Menu, X, Clipboard } from "lucide-reac
 
 const menu = [
   { label: "Início", href: "/dashboard", icon: <Home size={18} /> },
+  { label: "Calendário", href: "/agenda", icon: <Calendar size={18} /> },
   { label: "Agendamentos", href: "/agendamentos", icon: <Calendar size={18} /> },
   { label: "Novo Agendamento", href: "/agendamentos/novo", icon: <Calendar size={18} /> },
   { label: "Histórico", href: "/historico", icon: <Clipboard size={18} /> },
