@@ -29,6 +29,13 @@ export default function Dashboard() {
         />
 
         <Card
+          title="Histórico"
+          description="Visualize estatísticas de faturamento e produtividade."
+          href="/historico"
+          icon={<ClipboardList size={28} />}
+        />
+
+        <Card
           title="Clientes"
           description="Gerencie os dados e cadastros de clientes."
           href="/clientes"
@@ -42,12 +49,6 @@ export default function Dashboard() {
           icon={<Settings size={28} />}
         />
 
-        <Card
-          title="Histórico"
-          description="Visualize estatísticas de faturamento e produtividade."
-          href="/historico"
-          icon={<ClipboardList size={28} />}
-        />
       </div>
     </div>
   );
