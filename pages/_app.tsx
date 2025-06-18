@@ -10,7 +10,7 @@ export default function App({ Component, pageProps }: AppProps) {
   const [loading, setLoading] = useState(true);
   const [session, setSession] = useState<any>(null);
 
-  const rotasPublicas = ["/Login", "/cadastro", "/assinatura"];
+  const rotasPublicas = ["/Login", "/cadastros", "/assinatura"];
 
   useEffect(() => {
     async function validarSessao() {
