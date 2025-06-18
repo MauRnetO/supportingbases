@@ -11,7 +11,7 @@ export default function Dashboard() {
           title="Calendário"
           description="Visualizar dias disponíveis para agendamento"
           href="/agenda"
-          icon={<ClipboardList size={28} />}
+          icon={<Calendar size={28} />}
         />
 
         <Card
