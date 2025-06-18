@@ -95,7 +95,7 @@ export default function Agendamentos() {
         data: ag.data,
         hora: ag.hora,
         valor: ag.valor,
-        nome_cliente: ag.clientes?.nome || "Cliente não encontrado",
+        nome_cliente: Array.isArray(ag.clientes) ? ag.clientes[0]?.nome : ag.clientes?.nome || "Cliente não encontrado",
         servicos: ag.servicos_agendados
           ?.map((s: any) => s.servicos?.nome)
           .filter(Boolean)
