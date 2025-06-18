@@ -8,6 +8,13 @@ export default function Dashboard() {
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         <Card
+          title="Calendário"
+          description="Visualizar dias disponíveis para agendamento"
+          href="/agenda"
+          icon={<ClipboardList size={28} />}
+        />
+
+        <Card
           title="Agendamentos"
           description="Veja, edite e exclua os agendamentos do dia."
           href="/agendamentos"
@@ -18,13 +25,6 @@ export default function Dashboard() {
           title="Novo Agendamento"
           description="Cadastre um novo cliente e agende seus serviços."
           href="/agendamentos/novo"
-          icon={<ClipboardList size={28} />}
-        />
-
-        <Card
-          title="Calendário"
-          description="Visualizar dias disponíveis para agendamento"
-          href="/agenda"
           icon={<ClipboardList size={28} />}
         />
 
