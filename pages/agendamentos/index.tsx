@@ -91,17 +91,19 @@ export default function Agendamentos() {
       setErro("Erro ao carregar agendamentos.");
     } else {
       // Formata os dados como antes
-      const formatado = data?.map((ag) => ({
+      const formatado = (data as any[])?.map((ag) => ({
         id: ag.id,
         data: ag.data,
         hora: ag.hora,
         valor: ag.valor,
-        nome_cliente: Array.isArray(ag.clientes) ? ag.clientes[0]?.nome : ag.clientes?.nome || "Cliente não encontrado",
+        nome_cliente: Array.isArray(ag.clientes)
+          ? ag.clientes[0]?.nome
+          : ag.clientes?.nome || "Cliente não encontrado",
         servicos: ag.servicos_agendados
           ?.map((s: any) => s.servicos?.nome)
           .filter(Boolean)
           .join(", ") || "",
-      })) || [];
+      }));
 
       setAgendamentos(formatado);
     }
@@ -141,7 +143,7 @@ export default function Agendamentos() {
 
   return (
     <div className="max-w-3xl mx-auto p-4">
-      <h1 className="text-2xl font-bold mb-4">Agenda do Dia</h1>
+      <h1 className="text-2xl font-bold mb-4">Agendamentos do Dia</h1>
 
       <input
         type="date"
