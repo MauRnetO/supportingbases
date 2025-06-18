@@ -10,7 +10,7 @@ interface Agendamento {
   servicos: string;
 }
 
-export default function Agenda() {
+export default function Agendamentos() {
   const [agendamentos, setAgendamentos] = useState<Agendamento[]>([]);
   const [dataSelecionada, setDataSelecionada] = useState(() =>
     new Date().toISOString().split("T")[0]
