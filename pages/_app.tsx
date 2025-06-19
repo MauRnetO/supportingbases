@@ -29,7 +29,7 @@ export default function App({ Component, pageProps }: AppProps) {
           setLoading(false);
           return;
         }
-        sessao = { user: userData.user }; // cria sessão manualmente com user
+        sessao = { user: userData.user } as any; // cria sessão manualmente com user
       }
 
       const user = sessao.user;
