@@ -32,7 +32,12 @@ export default function App({ Component, pageProps }: AppProps) {
         sessao = { user: userData.user } as any; // cria sessão manualmente com user
       }
 
-      const user = sessao.user;
+      const user = sessao?.user;
+        if (!user) {
+          console.warn("❌ Usuário não encontrado na sessão.");
+          setLoading(false);
+        return;
+      }
 
       const { data: assinatura, error } = await supabase
         .from("assinaturas")
