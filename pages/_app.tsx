@@ -10,7 +10,7 @@ export default function App({ Component, pageProps }: AppProps) {
   const [loading, setLoading] = useState(true);
   const [session, setSession] = useState<any>(null);
 
-  const rotasPublicas = ["/Login", "/cadastros", "/assinatura"];
+  const rotasPublicas = ["/Login", "/cadastros", "/verificar", "/assinatura"];
 
   useEffect(() => {
     async function validarSessao() {
@@ -29,13 +29,13 @@ export default function App({ Component, pageProps }: AppProps) {
           setLoading(false);
           return;
         }
-        sessao = { user: userData.user } as any; // cria sessão manualmente com user
+        sessao = { user: userData.user } as any;
       }
 
       const user = sessao?.user;
-        if (!user) {
-          console.warn("❌ Usuário não encontrado na sessão.");
-          setLoading(false);
+      if (!user) {
+        console.warn("❌ Usuário não encontrado na sessão.");
+        setLoading(false);
         return;
       }
 
@@ -45,7 +45,12 @@ export default function App({ Component, pageProps }: AppProps) {
         .eq("usuario_id", user.id)
         .single();
 
-      if (error) console.error("❌ Erro ao buscar assinatura:", error);
+      if (error) {
+        console.error("❌ Erro ao buscar assinatura:", error);
+        setLoading(false);
+        return;
+      }
+
       console.log("🧾 Assinatura:", assinatura);
 
       if (!assinatura) {
@@ -67,7 +72,7 @@ export default function App({ Component, pageProps }: AppProps) {
         return;
       }
 
-      if (router.pathname === "/Login") {
+      if (router.pathname === "/Login" || router.pathname === "/cadastros") {
         router.replace("/dashboard");
         return;
       }
@@ -97,7 +102,7 @@ export default function App({ Component, pageProps }: AppProps) {
     );
   }
 
-  if (["/Login", "/cadastro", "/cadastros", "/assinatura"].includes(router.pathname)) {
+  if (rotasPublicas.includes(router.pathname)) {
     return <Component {...pageProps} />;
   }
 
