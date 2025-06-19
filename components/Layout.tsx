@@ -3,6 +3,7 @@ import { useRouter } from "next/router";
 import { useState } from "react";
 import { supabase } from "../supabaseClient";
 import { Home, Calendar, Users, Settings, Menu, X, Clipboard } from "lucide-react";
+import { usePreferencias } from "../hooks/usePreferencias";
 
 const menu = [
   { label: "Início", href: "/dashboard", icon: <Home size={18} /> },
@@ -17,6 +18,8 @@ const menu = [
 export default function Layout({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const [sidebarAberto, setSidebarAberto] = useState(false);
+
+  const preferencias = usePreferencias();
 
   async function sair() {
     await supabase.auth.signOut();
@@ -44,7 +47,11 @@ export default function Layout({ children }: { children: React.ReactNode }) {
         `}
       >
         <div className="flex items-center justify-between mb-8">
-          <h2 className="text-2xl font-bold text-green-600">MinhaAgenda</h2>
+          
+          <h2 className="text-2xl font-bold text-green-600">
+            {preferencias?.nome_marca || "MinhaAgenda"}
+          </h2>
+
           <button
             className="md:hidden text-gray-700"
             onClick={() => setSidebarAberto(false)}
