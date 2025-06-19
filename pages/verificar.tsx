@@ -31,16 +31,34 @@ export default function VerificarEmail() {
       return;
     }
 
-    // Após verificar, faz login com e-mail e senha
-    const { error: loginError } = await supabase.auth.signInWithPassword({
+    // Login após confirmação
+    const { data: loginData, error: loginError } = await supabase.auth.signInWithPassword({
       email,
       password: senha,
     });
 
-    if (loginError) {
+    if (loginError || !loginData?.session?.user?.id) {
       setMensagem("Erro ao entrar após validação.");
-    } else {
+      return;
+    }
+
+    const userId = loginData.session.user.id;
+
+    const { data: assinatura, error: assinaturaError } = await supabase
+      .from("assinaturas")
+      .select("ativo")
+      .eq("usuario_id", userId)
+      .single();
+
+    if (assinaturaError) {
+      setMensagem("Erro ao verificar assinatura.");
+      return;
+    }
+
+    if (assinatura?.ativo) {
       router.replace("/dashboard");
+    } else {
+      router.replace("/assinatura");
     }
   }
 
