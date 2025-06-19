@@ -18,17 +18,23 @@ export default function Cadastro() {
       return;
     }
 
-    const { error } = await supabase.auth.signUp({
+    const { data, error } = await supabase.auth.admin.createUser({
       email,
       password: senha,
+      email_confirm: false,
     });
 
     if (error) {
       setMensagem(error.message);
-    } else {
-      setMensagem("Conta criada! Verifique seu e-mail.");
-      setTimeout(() => router.push("/Login"), 2000);
+      return;
     }
+
+    await supabase.auth.admin.generateOtp({ email, type: "email" });
+
+    router.push({
+      pathname: "/verificar",
+      query: { email, senha },
+    });
   }
 
   return (
@@ -66,7 +72,7 @@ export default function Cadastro() {
         />
 
         <button type="submit" className="w-full bg-green-600 text-white py-2 rounded">
-          Criar Conta
+          Enviar Código de Verificação
         </button>
       </form>
     </div>
