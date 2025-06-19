@@ -17,22 +17,27 @@ export default function App({ Component, pageProps }: AppProps) {
       console.log("🔍 Verificando sessão...");
 
       const { data: sessionData } = await supabase.auth.getSession();
-      const sessao = sessionData.session;
-      console.log("📦 Sessão atual:", sessao);
+      let sessao = sessionData.session;
 
       if (!sessao) {
-        if (!rotasPublicas.includes(router.pathname)) {
-          console.warn("⚠️ Sem sessão. Redirecionando para /Login");
-          router.replace("/Login");
+        const { data: userData } = await supabase.auth.getUser();
+        if (!userData?.user) {
+          if (!rotasPublicas.includes(router.pathname)) {
+            console.warn("⚠️ Sem sessão. Redirecionando para /Login");
+            router.replace("/Login");
+          }
+          setLoading(false);
+          return;
         }
-        setLoading(false);
-        return;
+        sessao = { user: userData.user }; // cria sessão manualmente com user
       }
+
+      const user = sessao.user;
 
       const { data: assinatura, error } = await supabase
         .from("assinaturas")
         .select("plano, ativo")
-        .eq("usuario_id", sessao.user.id)
+        .eq("usuario_id", user.id)
         .single();
 
       if (error) console.error("❌ Erro ao buscar assinatura:", error);
@@ -87,7 +92,7 @@ export default function App({ Component, pageProps }: AppProps) {
     );
   }
 
-  if (["/Login", "/cadastro", "/assinatura"].includes(router.pathname)) {
+  if (["/Login", "/cadastro", "/cadastros", "/assinatura"].includes(router.pathname)) {
     return <Component {...pageProps} />;
   }
 
