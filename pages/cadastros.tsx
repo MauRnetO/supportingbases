@@ -18,30 +18,31 @@ export default function Cadastro() {
       return;
     }
 
-    // Cria o usuário com senha (sem confirmação via link)
-    const { error: createError } = await supabase.auth.admin.createUser({
+    // Cria usuário com senha
+    const { error: signUpError } = await supabase.auth.signUp({
       email,
       password: senha,
-      email_confirm: false,
     });
 
-    if (createError) {
-      setMensagem(createError.message);
+    if (signUpError) {
+      setMensagem(signUpError.message);
       return;
     }
 
-    // Envia código de verificação por e-mail (OTP)
+    // Envia código de verificação
     const { error: otpError } = await supabase.auth.signInWithOtp({
       email,
-      options: { shouldCreateUser: false },
+      options: {
+        shouldCreateUser: false, // usuário já foi criado
+      },
     });
 
     if (otpError) {
-      setMensagem("Erro ao enviar código de verificação.");
+      setMensagem("Erro ao enviar código de verificação: " + otpError.message);
       return;
     }
 
-    // Redireciona para página de verificação com e-mail e senha
+    // Redireciona para página de verificação
     router.push({
       pathname: "/verificar",
       query: { email, senha },
@@ -50,10 +51,15 @@ export default function Cadastro() {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-100 px-4">
-      <form onSubmit={registrarUsuario} className="bg-white p-6 rounded shadow-md w-full max-w-sm">
+      <form
+        onSubmit={registrarUsuario}
+        className="bg-white p-6 rounded shadow-md w-full max-w-sm"
+      >
         <h1 className="text-xl font-bold mb-4 text-center">Criar Conta</h1>
 
-        {mensagem && <p className="text-red-600 mb-2 text-sm text-center">{mensagem}</p>}
+        {mensagem && (
+          <p className="text-red-600 mb-2 text-sm text-center">{mensagem}</p>
+        )}
 
         <input
           type="email"
@@ -82,7 +88,10 @@ export default function Cadastro() {
           required
         />
 
-        <button type="submit" className="w-full bg-green-600 text-white py-2 rounded">
+        <button
+          type="submit"
+          className="w-full bg-green-600 text-white py-2 rounded"
+        >
           Enviar Código de Verificação
         </button>
       </form>
