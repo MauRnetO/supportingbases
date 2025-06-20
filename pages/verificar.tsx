@@ -23,15 +23,16 @@ export default function VerificarEmail() {
     const { error: verifyError } = await supabase.auth.verifyOtp({
       email,
       token: codigo,
-      type: "signup",
+      type: "email", // tipo correto para o fluxo de verificação por código
     });
 
     if (verifyError) {
+      console.error("Erro na verificação OTP:", verifyError);
       setMensagem("Código inválido ou expirado.");
       return;
     }
 
-    // Login após confirmação
+    // Realiza login com e-mail e senha definidos no cadastro
     const { data: loginData, error: loginError } = await supabase.auth.signInWithPassword({
       email,
       password: senha,
