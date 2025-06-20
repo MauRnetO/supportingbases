@@ -18,22 +18,34 @@ export default function Cadastro() {
       return;
     }
 
-    // Envia o código de verificação por e-mail (OTP)
-    const { error } = await supabase.auth.signInWithOtp({
+    // Cria o usuário com senha (sem confirmação via link)
+    const { error: createError } = await supabase.auth.admin.createUser({
       email,
-      options: {
-        shouldCreateUser: true,
-      },
+      password: senha,
+      email_confirm: false,
     });
 
-    if (error) {
-      setMensagem(error.message);
-    } else {
-      router.push({
-        pathname: "/verificar",
-        query: { email, senha },
-      });
+    if (createError) {
+      setMensagem(createError.message);
+      return;
     }
+
+    // Envia código de verificação por e-mail (OTP)
+    const { error: otpError } = await supabase.auth.signInWithOtp({
+      email,
+      options: { shouldCreateUser: false },
+    });
+
+    if (otpError) {
+      setMensagem("Erro ao enviar código de verificação.");
+      return;
+    }
+
+    // Redireciona para página de verificação com e-mail e senha
+    router.push({
+      pathname: "/verificar",
+      query: { email, senha },
+    });
   }
 
   return (
