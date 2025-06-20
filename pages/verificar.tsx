@@ -10,9 +10,12 @@ export default function VerificarEmail() {
   const [mensagem, setMensagem] = useState("");
 
   useEffect(() => {
-    if (router.query.email && router.query.senha) {
-      setEmail(router.query.email as string);
-      setSenha(router.query.senha as string);
+    if (router.query.email) {
+      const emailParam = router.query.email as string;
+      setEmail(emailParam);
+
+      const senhaSalva = localStorage.getItem(`senha_cadastro_${emailParam}`);
+      if (senhaSalva) setSenha(senhaSalva);
     }
   }, [router.query]);
 
@@ -20,26 +23,20 @@ export default function VerificarEmail() {
     e.preventDefault();
     setMensagem("");
 
-    const { error: verifyError } = await supabase.auth.verifyOtp({
-      email,
-      token: codigo,
-      type: "email", // tipo correto para o fluxo de verificação por código
-    });
-
-    if (verifyError) {
-      console.error("Erro na verificação OTP:", verifyError);
-      setMensagem("Código inválido ou expirado.");
+    const codigoSalvo = localStorage.getItem(`codigo_verificacao_${email}`);
+    if (!codigoSalvo || codigo !== codigoSalvo) {
+      setMensagem("Código incorreto ou expirado.");
       return;
     }
 
-    // Realiza login com e-mail e senha definidos no cadastro
+    // Login com senha salva localmente
     const { data: loginData, error: loginError } = await supabase.auth.signInWithPassword({
       email,
       password: senha,
     });
 
     if (loginError || !loginData?.session?.user?.id) {
-      setMensagem("Erro ao entrar após validação.");
+      setMensagem("Erro ao fazer login após verificação.");
       return;
     }
 

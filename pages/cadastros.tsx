@@ -1,39 +1,61 @@
 import { useState } from "react";
 import { useRouter } from "next/router";
 import { supabase } from "../supabaseClient";
+import { enviarCodigoVerificacao } from "../lib/email";
 
 export default function Cadastro() {
   const [email, setEmail] = useState("");
   const [senha, setSenha] = useState("");
   const [confirmarSenha, setConfirmarSenha] = useState("");
   const [mensagem, setMensagem] = useState("");
+  const [carregando, setCarregando] = useState(false);
   const router = useRouter();
+
+  function gerarCodigo() {
+    return Math.floor(100000 + Math.random() * 900000).toString(); // 6 dígitos
+  }
 
   async function registrarUsuario(e: React.FormEvent) {
     e.preventDefault();
     setMensagem("");
+    setCarregando(true);
 
     if (senha !== confirmarSenha) {
       setMensagem("As senhas não coincidem.");
+      setCarregando(false);
       return;
     }
 
-    const { data, error } = await supabase.auth.signUp({
+    // Cria usuário com senha, mas sem exigir verificação por e-mail
+    const { data: userData, error: userError } = await supabase.auth.admin.createUser({
       email,
       password: senha,
-      options: {
-        emailRedirectTo: "", // Não usar redirect
-      },
+      email_confirm: false,
     });
 
-    if (error) {
-      setMensagem(error.message);
-    } else {
-      router.push({
-        pathname: "/verificar",
-        query: { email, senha },
-      });
+    if (userError) {
+      setMensagem(userError.message);
+      setCarregando(false);
+      return;
     }
+
+    // Gera código e salva no localStorage temporariamente
+    const codigo = gerarCodigo();
+    localStorage.setItem(`codigo_verificacao_${email}`, codigo);
+    localStorage.setItem(`senha_cadastro_${email}`, senha); // facilita o login no passo seguinte
+
+    const envio = await enviarCodigoVerificacao(email, codigo);
+
+    if (!envio.sucesso) {
+      setMensagem("Erro ao enviar código: " + envio.erro);
+      setCarregando(false);
+      return;
+    }
+
+    router.push({
+      pathname: "/verificar",
+      query: { email },
+    });
   }
 
   return (
@@ -70,8 +92,12 @@ export default function Cadastro() {
           required
         />
 
-        <button type="submit" className="w-full bg-green-600 text-white py-2 rounded">
-          Enviar Código de Verificação
+        <button
+          type="submit"
+          className="w-full bg-green-600 text-white py-2 rounded"
+          disabled={carregando}
+        >
+          {carregando ? "Enviando..." : "Enviar Código de Verificação"}
         </button>
       </form>
     </div>
